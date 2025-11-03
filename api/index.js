@@ -1,10 +1,8 @@
-import express from "express"; import cors from "cors"; import morgan from "morgan";
-const TOKEN=process.env.API_TOKEN||"dev-12345";
-const app=express(); app.use(cors()); app.use(express.json()); app.use(morgan("dev"));
-const auth=(req,res,next)=> req.header("x-api-key")===TOKEN ? next() : res.status(401).json({error:"unauthorized"});
-const points=[{id:"p1",type:"ride",name:"Coaster A",lat:25.1972,lng:55.2744,heat:0.6},{id:"p2",type:"kiosk",name:"Kiosk 12",lat:25.1967,lng:55.275,heat:0.3},{id:"p3",type:"entry",name:"Gate N",lat:25.1978,lng:55.2737,heat:0.9}];
-app.get("/",(_q,r)=>r.json({name:"Geospatial Map API",ok:true}));
-app.get("/api/map",auth,(_q,r)=>r.json({tiles:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",center:{lat:25.1972,lng:55.2744},zoom:16,bounds:[[25.193,55.271],[25.201,55.279]]}));
-app.get("/api/heatmap",auth,(_q,r)=>r.json(points.map(p=>[p.lat,p.lng,p.heat])));
-app.get("/api/points/:id",auth,(q,r)=>{const p=points.find(x=>x.id===q.params.id); if(!p) return r.status(404).json({error:"not_found"}); r.json(p);});
-app.listen(Number(process.env.API_PORT||5107),()=>console.log("Geospatial http://127.0.0.1:"+ (process.env.API_PORT||5107)));
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+const app = express();
+app.use(cors()); app.use(express.json()); app.use(morgan("dev"));
+app.get("/", (_q,r)=>r.json({name:"Geospatial Map API", ok:true}));
+app.get("/api", (_q,r)=>r.json({hint:"add real endpoints here"}));
+app.listen(5107, ()=>console.log("Geospatial Map API on http://127.0.0.1:5107"));

@@ -1,1 +1,3 @@
-{"name":"geospatial-api","type":"module","scripts":{"dev":"node index.js"},"dependencies":{"cors":"^2.8.5","express":"^4.19.2","morgan":"^1.10.0"}}
+{ "name":"Geospatial Map API", "type":"module",
+  "scripts": { "dev":"node index.js" },
+  "dependencies": { "cors":"^2.8.5","express":"^4.19.2","morgan":"^1.10.0" } }

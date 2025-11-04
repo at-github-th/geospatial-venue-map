@@ -1,11 +1,32 @@
-<!doctype html><meta charset="utf-8"><title>geospatial-venue-map-native demo</title>
-<style>body{font-family:system-ui,Arial;margin:24px;max-width:900px}.row{display:flex;gap:8px;margin:8px 0}button{padding:8px 12px}pre{background:#111;color:#0f0;padding:12px;min-height:120px;white-space:pre-wrap}</style>
-<h1>geospatial-venue-map-native web tester</h1>
-<div class="row"><label>API base</label><input id="base" size="40" value="http://127.0.0.1:5107"><button onclick="ping()">Ping</button><button onclick="ex()">Run Example</button></div>
-<pre id="out">Click a button…</pre>
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Geospatial Venue Map</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  body{font-family:system-ui;margin:0;background:#0b0b0b;color:#eee}
+  header{padding:14px 18px;background:#111;border-bottom:1px solid #232323;display:flex;justify-content:space-between;align-items:center}
+  .wrap{display:grid;grid-template-columns: 1fr 360px; gap:0}
+  #map{height:calc(100vh - 58px);background:linear-gradient(135deg,#0a0a0a,#111)}
+  aside{border-left:1px solid #232323;background:#0e0e0e;height:calc(100vh - 58px);overflow:auto;padding:12px}
+  .pt{border:1px solid #333;border-radius:8px;padding:8px;margin-bottom:8px}
+  .heat{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+</style></head><body>
+<header>
+  <div>Geospatial Venue Map</div><div>Node • :5107</div>
+</header>
+<div class="wrap">
+  <div id="map"></div>
+  <aside><h3>Points</h3><div id="list">Loading…</div></aside>
+</div>
 <script>
-const out=document.getElementById('out');
-function base(){return document.getElementById('base').value}
-async function ping(){try{const r=await fetch(base()); out.textContent=JSON.stringify(await r.json(),null,2);}catch(e){out.textContent=String(e)}}
-async function ex(){out.textContent="Try /api endpoints for this app"}
-</script>
+const BASE="http://127.0.0.1:5107";
+async function load(){
+  const pts=await fetch(BASE+"/api/points").then(r=>r.json()).catch(()=>[]);
+  const list=document.getElementById('list');
+  list.innerHTML=pts.map(p=>{
+    const col=p.heat>0.7?"#ef4444":p.heat>0.4?"#f59e0b":"#22c55e";
+    return `<div class="pt"><span class="heat" style="background:${col}"></span><b>${p.name}</b> • ${p.type}<br/><small>${p.lat.toFixed(4)}, ${p.lng.toFixed(4)} • heat ${p.heat}</small></div>`;
+  }).join("");
+  const ctx=document.getElementById('map').getContext?.('2d'); // noop if no canvas
+}
+load();
+</script></body></html>

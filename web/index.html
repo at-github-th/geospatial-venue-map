@@ -1,32 +1,53 @@
-<!doctype html><html><head><meta charset="utf-8"/>
-<title>Geospatial Venue Map</title>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!doctype html><html><head>
+<meta charset="utf-8"/><title>Geospatial Venue Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <style>
-  body{font-family:system-ui;margin:0;background:#0b0b0b;color:#eee}
-  header{padding:14px 18px;background:#111;border-bottom:1px solid #232323;display:flex;justify-content:space-between;align-items:center}
-  .wrap{display:grid;grid-template-columns: 1fr 360px; gap:0}
-  #map{height:calc(100vh - 58px);background:linear-gradient(135deg,#0a0a0a,#111)}
-  aside{border-left:1px solid #232323;background:#0e0e0e;height:calc(100vh - 58px);overflow:auto;padding:12px}
-  .pt{border:1px solid #333;border-radius:8px;padding:8px;margin-bottom:8px}
-  .heat{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
-</style></head><body>
-<header>
-  <div>Geospatial Venue Map</div><div>Node • :5107</div>
-</header>
-<div class="wrap">
-  <div id="map"></div>
-  <aside><h3>Points</h3><div id="list">Loading…</div></aside>
-</div>
+  body{margin:0;background:#0b0b0c;color:#e7e7ea;font:14px/1.4 -apple-system,system-ui,Segoe UI,Roboto;}
+  header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#111;border-bottom:1px solid #222}
+  main{display:grid;grid-template-columns:1fr 320px;height:calc(100vh - 48px)}
+  #canvas{background:#0e0e10;position:relative}
+  #panel{border-left:1px solid #222;padding:10px;overflow:auto}
+  .pt{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed #222}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .err{color:#ff6b6b}
+</style>
+</head><body>
+<header><strong>Geospatial Venue Map</strong><span>Node · 5107</span></header>
+<main>
+  <div id="canvas"></div>
+  <div id="panel"><h3>Points</h3><div id="list">Loading…</div></div>
+</main>
 <script>
-const BASE="http://127.0.0.1:5107";
+const API="http://127.0.0.1:5107";
+const list=document.getElementById('list');
+const canvas=document.getElementById('canvas');
+
 async function load(){
-  const pts=await fetch(BASE+"/api/points").then(r=>r.json()).catch(()=>[]);
-  const list=document.getElementById('list');
-  list.innerHTML=pts.map(p=>{
-    const col=p.heat>0.7?"#ef4444":p.heat>0.4?"#f59e0b":"#22c55e";
-    return `<div class="pt"><span class="heat" style="background:${col}"></span><b>${p.name}</b> • ${p.type}<br/><small>${p.lat.toFixed(4)}, ${p.lng.toFixed(4)} • heat ${p.heat}</small></div>`;
-  }).join("");
-  const ctx=document.getElementById('map').getContext?.('2d'); // noop if no canvas
+  try{
+    const r = await fetch(API+'/api/points');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const pts = await r.json();
+    render(pts);
+  }catch(e){
+    console.error(e);
+    list.innerHTML = '<div class="err">Failed to load points. Is the API on 5107 running?</div>';
+  }
+}
+
+function render(pts){
+  list.innerHTML='';
+  canvas.innerHTML='';
+  pts.forEach(p=>{
+    const row=document.createElement('div');row.className='pt';
+    const sw=document.createElement('span');sw.className='dot';sw.style.background=p.color||'#888';
+    const txt=document.createElement('span');txt.textContent = p.label+'  ('+p.x+','+p.y+')';
+    row.appendChild(sw);row.appendChild(txt);list.appendChild(row);
+
+    const dot=document.createElement('div');dot.className='dot';
+    dot.style.cssText=`position:absolute;left:${p.x}px;top:${p.y}px;transform:translate(-50%,-50%);background:${p.color||'#888'};width:12px;height:12px;`;
+    canvas.appendChild(dot);
+  });
 }
 load();
-</script></body></html>
+</script>
+</body></html>
